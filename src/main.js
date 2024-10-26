@@ -1,4 +1,5 @@
 import "vue-virtual-scroller/dist/vue-virtual-scroller.css";
+import "@/assets/styles/tailwind.css";
 import "@/assets/styles/main.css";
 import { createApp } from "vue";
 import router from "./router";

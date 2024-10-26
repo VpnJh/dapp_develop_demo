@@ -6,10 +6,21 @@ import { configCompressPlugin } from "./compress";
 import removeNoMatch from "vite-plugin-router-warn";
 import { visualizer } from "rollup-plugin-visualizer";
 import removeConsole from "vite-plugin-remove-console";
+import AutoImport from "unplugin-auto-import/vite";
+import Components from "unplugin-vue-components/vite";
+import { VantResolver } from "@vant/auto-import-resolver";
+import vueJsx from "@vitejs/plugin-vue-jsx";
 export function getPluginsList(VITE_CDN, VITE_COMPRESSION) {
   const lifecycle = process.env.npm_lifecycle_event;
   return [
     vue(),
+    vueJsx(),
+    AutoImport({
+      resolvers: [VantResolver()]
+    }),
+    Components({
+      resolvers: [VantResolver()]
+    }),
     // 按下Command(⌘)+Shift(⇧)，然后点击页面元素会自动打开本地IDE并跳转到对应的代码位置
     viteBuildInfo(),
     /**
