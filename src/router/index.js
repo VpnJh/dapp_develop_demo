@@ -5,6 +5,8 @@ import {
 } from "vue-router";
 import { loadLanguageAsync, supportLanguages } from "@/locales/i18n";
 import { useAppConfigStore } from "@/stores";
+import { h, defineAsyncComponent } from "vue";
+import Loading from "@/views/loading/index.vue";
 
 /** 获取路由历史模式 https://next.router.vuejs.org/zh/guide/essentials/history-mode.html */
 function getHistoryMode(routerHistory) {
@@ -28,20 +30,31 @@ function getHistoryMode(routerHistory) {
     }
   }
 }
-
-// function lazyLoad(component_name, params = {}) {
-//   return {
-//     render() {
-//       const async_component = defineAsyncComponent({
-//         loader: () => import(`../views/${component_name}.vue`),
-//         loadingComponent: Loading,
-//         ...params
-//       });
-//       return h(async_component);
-//     }
-//   };
-// }
-
+/*
+ * timmy
+ * desc: 路由懒加载
+ * params  string
+ * return component
+ * */
+function lazyLoad(componentName) {
+  return defineAsyncComponent({
+    loader: () => {
+      return import(`../views/${componentName}.vue`).catch(error => {
+        console.error(`Failed to load component ${componentName}:`, error);
+        // 返回一个空组件或者错误组件
+        return {
+          render() {
+            return h("div", "加载失败，请重试");
+          }
+        };
+      });
+    },
+    loadingComponent: Loading,
+    delay: 200, // 可以设置延迟时间
+    timeout: 3000 // 可以设置超时时间
+  });
+}
+export const cacheWhiteList = [];
 const router = createRouter({
   history: getHistoryMode(import.meta.env.VITE_ROUTER_HISTORY),
   scrollBehavior: (to, from, savedPosition) => {
@@ -53,20 +66,28 @@ const router = createRouter({
   routes: [
     {
       path: "/",
-      redirect: "/index"
+      redirect: "/home"
+    },
+    {
+      path: "/test",
+      name: "test",
+      component: lazyLoad("test/index"),
+      meta: {
+        title: "test"
+      }
     },
     {
       path: "/home",
       name: "home",
-      component: () => import(`../views/home/home.vue`),
+      component: lazyLoad("home/index"),
       meta: {
-        title: "home"
+        title: "AppList"
       }
     },
     {
-      path: "/index",
-      name: "index",
-      component: () => import(`../views/index/index.vue`),
+      path: "/user",
+      name: "user",
+      component: lazyLoad("user/index"),
       meta: {
         title: "AppList"
       }
@@ -74,10 +95,20 @@ const router = createRouter({
     {
       path: "/loading",
       name: "loading",
-      component: () => import(`../views/loading/loading.vue`),
+      component: Loading,
       meta: {
         title: "loading"
       }
+    },
+    {
+      path: "/notFound",
+      name: "notFound",
+      component: () => import("../views/notFound/index.vue")
+    },
+    {
+      path: "/*",
+      name: "all",
+      redirect: "/notFound"
     }
   ]
 });
@@ -87,7 +118,6 @@ router.beforeEach((to, from, next) => {
   const lang = to.query.lang;
   const appConfigStore = useAppConfigStore();
   if (lang != null && supportLanguages.includes((lang || "").toString())) {
-    console.log("appConfigStore", appConfigStore.$state);
     if (appConfigStore.$state.lang !== lang.toString()) {
       // 路由带参数 不用 语言才进行 加载 语言文本
       return loadLanguageAsync(lang.toString()).then(() => {

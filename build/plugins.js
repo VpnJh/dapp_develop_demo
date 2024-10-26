@@ -10,10 +10,22 @@ import AutoImport from "unplugin-auto-import/vite";
 import Components from "unplugin-vue-components/vite";
 import { VantResolver } from "@vant/auto-import-resolver";
 import vueJsx from "@vitejs/plugin-vue-jsx";
+import dynamicImport from "vite-plugin-dynamic-import";
+import { nodePolyfills } from "vite-plugin-node-polyfills";
 export function getPluginsList(VITE_CDN, VITE_COMPRESSION) {
   const lifecycle = process.env.npm_lifecycle_event;
   return [
     vue(),
+    nodePolyfills(),
+    dynamicImport({
+      filter(id) {
+        // `node_modules` is exclude by default, so we need to include it explicitly
+        // https://github.com/vite-plugin/vite-plugin-dynamic-import/blob/v1.3.0/src/index.ts#L133-L135
+        if (id.includes("/node_modules/foo")) {
+          return true;
+        }
+      }
+    }),
     vueJsx(),
     AutoImport({
       resolvers: [VantResolver()]

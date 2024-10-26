@@ -1,12 +1,14 @@
 <template>
   <router-view v-slot="{ Component, route }">
-    <transition :name="(route.meta.transition || 'fade').toString()">
-      <keep-alive v-if="route.meta.cache">
-        <component :is="Component" />
-      </keep-alive>
-      <template v-else>
-        <component :is="Component" />
-      </template>
-    </transition>
+    <keep-alive :include="$cacheWhiteList">
+      <transition :name="(route.meta.transition || 'fade').toString()">
+        <component :is="Component" :key="route.meta.name" />
+      </transition>
+    </keep-alive>
   </router-view>
 </template>
+<script setup>
+import { getCurrentInstance } from "vue";
+const { $cacheWhiteList } =
+  getCurrentInstance().appContext.config.globalProperties;
+</script>

@@ -2,7 +2,6 @@ import { createWeb3Modal, defaultConfig } from "@web3modal/ethers/vue";
 const projectId = import.meta.env.VITE_APP_PROJECT_ID;
 // 3. Create your application's metadata object
 const currentOrigin = window.location.origin;
-console.log("currentOrigin：", currentOrigin);
 
 const metadata = {
   name: "TestDemo",
@@ -31,7 +30,8 @@ const ethersConfig = defaultConfig({
   auth: {
     email: false, // default to true
     showWallets: true,
-    walletFeatures: true
+    walletFeatures: true,
+    socials: []
   },
   enableEIP6963: true, // true by default
   enableInjected: true, // true by default

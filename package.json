@@ -45,8 +45,7 @@
     "vant": "^4.9.8",
     "vue": "^3.4.29",
     "vue-i18n": "^10.0.4",
-    "vue-router": "^4.4.5",
-    "vue-virtual-scroller": "^2.0.0-beta.8"
+    "vue-router": "^4.4.5"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.3.0",
@@ -89,7 +88,9 @@
     "vite": "^4",
     "vite-plugin-cdn-import": "^1.0.1",
     "vite-plugin-compression": "^0.5.1",
+    "vite-plugin-dynamic-import": "^1.6.0",
     "vite-plugin-fake-server": "^2.1.1",
+    "vite-plugin-node-polyfills": "^0.22.0",
     "vite-plugin-remove-console": "^2.2.0",
     "vite-plugin-router-warn": "^1.0.0",
     "vite-svg-loader": "^5.1.0",
