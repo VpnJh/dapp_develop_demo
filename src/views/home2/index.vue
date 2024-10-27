@@ -232,10 +232,14 @@ const initAccount = async function () {
   try {
     if (!address.value) {
       modal.open({ view: "Connect" }).then(value => {
-        console.log(document.getElementsByTagName("w3m-modal"));
-        setTimeout(() => {}, 1000);
+        console.log("value", value);
+        nextTick(() => {
+          const flexElement = document.getElementsByTagName(
+            "w3m-connect-announced-widget"
+          );
+          console.log("flexElement", flexElement);
+        });
       });
-
       // if (!isConnected) {
       // await provider.ge
       // };

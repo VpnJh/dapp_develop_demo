@@ -81,7 +81,15 @@ const router = createRouter({
       name: "home",
       component: lazyLoad("home/index"),
       meta: {
-        title: "AppList"
+        title: "链调试功能demo"
+      }
+    },
+    {
+      path: "/home2",
+      name: "home2",
+      component: lazyLoad("home2/index"),
+      meta: {
+        title: "链调试功能demo2"
       }
     },
     {
