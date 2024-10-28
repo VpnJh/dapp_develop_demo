@@ -2,8 +2,8 @@
   <div class="home-page">
     <div class="banner-img">
       <img
-        class="img-ban"
         v-lazy="getAssetsImageUrl('/bannerimg.png')"
+        class="img-ban"
         alt=""
       />
       <van-notice-bar
@@ -40,12 +40,12 @@
           </div>
         </div>
         <div class="functional-area backminning">
-          <div></div>
-          <div></div>
+          <div />
+          <div />
         </div>
         <div class="functional-area backheight">
-          <div></div>
-          <div></div>
+          <div />
+          <div />
         </div>
       </div>
       <van-button v-if="!isConnected" class="join-btv" type="warning">{{
@@ -61,7 +61,7 @@
         </div>
         <div class="box-line" />
         <div class="box-contant">
-          <div class="contant-item" v-for="item in testData" :key="item.addr">
+          <div v-for="item in testData" :key="item.addr" class="contant-item">
             <div class="item-addr">
               {{ item.a.substring(0, 4) + "******" + item.a.substring(13, 17) }}
             </div>
@@ -81,7 +81,7 @@ import {
   truncateString,
   formattedNumber
 } from "@/utils/index.utils.js";
-import { useI18n } from "vue-i18n";
+import { useI18n } from "vue3-i18n";
 import { useConfigStore } from "@/stores/index";
 const configStore = useConfigStore();
 const { t } = useI18n();
