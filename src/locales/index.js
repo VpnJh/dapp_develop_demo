@@ -1,17 +1,17 @@
 import { createI18n } from "vue-i18n";
-import messages from "@/locales/lang/en";
+import messages from "@/locales/lang/zh-CN.json";
 import { useAppConfigStore } from "@/stores";
-export const supportLanguages = ["en", "zh-CN", "zh-TW"];
+export const supportLanguages = ["en-US", "zh-CN", "zh-TW"];
 const localStorageAppConfig = sessionStorage.getItem("appConfig");
-let local = "en";
+let local = "en-US";
 if (localStorageAppConfig != null) {
   const localConfig = JSON.parse(localStorageAppConfig);
-  local = localConfig.lang || "en";
+  local = localConfig.lang || "en-US";
 }
 const i18n = createI18n({
   legacy: false,
   locale: local, // set locale
-  fallbackLocale: "en",
+  fallbackLocale: "en-US",
   globalInjection: true,
   availableLocales: supportLanguages,
   messages: {

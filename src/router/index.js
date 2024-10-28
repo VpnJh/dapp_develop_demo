@@ -3,7 +3,7 @@ import {
   createWebHashHistory,
   createWebHistory
 } from "vue-router";
-import { loadLanguageAsync, supportLanguages } from "@/locales/i18n";
+import { loadLanguageAsync, supportLanguages } from "@/locales/index";
 import { useAppConfigStore } from "@/stores";
 import { h, defineAsyncComponent } from "vue";
 import Loading from "@/views/loading/index.vue";
@@ -79,15 +79,15 @@ const router = createRouter({
     {
       path: "/home",
       name: "home",
-      component: lazyLoad("home/index"),
+      component: import("../views/home/index.vue"),
       meta: {
-        title: "链调试功能demo"
+        title: "首页"
       }
     },
     {
       path: "/home2",
       name: "home2",
-      component: lazyLoad("home2/index"),
+      component: import("../views/home2/index.vue"),
       meta: {
         title: "链调试功能demo2"
       }

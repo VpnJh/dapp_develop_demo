@@ -35,7 +35,8 @@ export default ({ mode }) => {
           // 这里填写后端地址
           target: VITE_POROXY_URL,
           changeOrigin: true,
-          rewrite: path => path.replace(new RegExp(`^${VITE_API_URL}`), "")
+          rewrite: path =>
+            path.replace(new RegExp(`^${VITE_API_URL}`), VITE_API_URL + "")
         }
       },
       // 预热文件以提前转换和缓存结果，降低启动期间的初始页面加载时长并防止转换瀑布

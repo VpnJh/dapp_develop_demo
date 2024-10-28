@@ -1,4 +1,3 @@
-// store/modules/user.ts
 import { defineStore } from "pinia";
 
 //@ts-ignore

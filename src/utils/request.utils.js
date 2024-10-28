@@ -1,11 +1,11 @@
 import axios from "axios";
-
+console.log("import.meta.env.VITE_API_URL", import.meta.env.VITE_API_URL);
 // 创建 Axios 实例
 const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_URL, // 替换为你的 API 基础 URL
   timeout: 10000, // 请求超时时间
   headers: {
-    "Content-Type": "application/json"
+    "Content-Type": "application/x-www-form-urlencoded"
   }
 });
 
@@ -28,7 +28,7 @@ axiosInstance.interceptors.request.use(
 axiosInstance.interceptors.response.use(
   response => {
     // 对响应数据做些什么
-    return response.data; // 直接返回数据
+    return response; // 直接返回数据
   },
   error => {
     // 对响应错误做些什么

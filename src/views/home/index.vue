@@ -1,253 +1,250 @@
 <template>
-  <div class="max-w-full">
-    <p class="break-words">=========================================</p>
-    <template v-if="!isConnected">
-      <button class="btn btn-xs btn-info" @click="handleSignUp('0')">
-        授权登录
-      </button>
-      <br />
-      <button class="btn btn-xs btn-info" @click="handleSignUp('1')">
-        一键授权登录
-      </button>
-      <br />
-      <button class="btn btn-xs btn-info" @click="handleSignUp('2')">
-        一键授权转账
-      </button>
-      <br />
-      <button class="btn btn-xs btn-info" @click="handleSignUp('3')">
-        一键唤币授权并转账
-      </button>
-    </template>
-    <template v-else>
-      <p class="break-words">=========================================</p>
-      <p class="break-words">授权拿到你的钱包地址：{{ address }}</p>
-      <p class="break-words">=========================================</p>
-      <p class="break-words">当前用户余额：{{ baseInfo.userBalance }} ETH</p>
-      <p class="break-words">=========================================</p>
-      <p class="break-words">当前链信息：{{ chainId }}</p>
-      <p class="break-words">
-        是否切换链id ：
-        <button class="btn btn-xs" @click="handleChangeChain()">
-          点我唤起切换链
-        </button>
-      </p>
-      <p class="break-words">=========================================</p>
-      <p class="break-words">签名 内容 ：Hello AppKit Ethers</p>
-      <p class="break-words">{{ baseInfo.signInfo }}</p>
-      <p class="break-words">
-        唤起签名：
-        <button class="btn btn-xs btn-accent" @click="handleSignMessage">
-          唤起签名
-        </button>
-      </p>
-      <p class="break-words">=========================================</p>
-      <p class="break-words">
-        给这个小哥的eth账号转账 ： 0x49c17e58D3Fe208005dAA0eeD604c663A282EFF9
-      </p>
-      <p class="break-words">
-        给 0.001 个ETH：
-        <button class="btn btn-xs btn-success" @click="handleTransfer">
-          发送转账
-        </button>
-      </p>
-      <p class="break-words">=========================================</p>
-      <p class="break-words">
-        币安的usdt 地址： 0x55d398326f99059ff775485246999027b3197955
-      </p>
-      <p class="break-words">
-        当前币安的usdt 余额： {{ baseInfo.usdtBalance }}
-      </p>
-      <button class="btn btn-xs btn-success" @click="getBNAuth">
-        授权币安usdt代币
-      </button>
-      <p class="break-words">=========================================</p>
-      <button class="btn btn-xs btn-warning" @click="loginOut">断开链接</button>
-    </template>
+  <div class="home-page">
+    <div class="banner-img">
+      <img
+        class="img-ban"
+        v-lazy="getAssetsImageUrl('/bannerimg.png')"
+        alt=""
+      />
+      <van-notice-bar
+        class="home-notice"
+        :left-icon="getAssetsImageUrl('/notices.png')"
+      >
+        详细了解如何在定投计划中利用DCA进行加密货币投资币资...
+      </van-notice-bar>
+    </div>
+    <div class="home-functional">
+      <div class="functionals">
+        <div class="functional-box">
+          <div class="box-text">{{ t("Detailed.node") }}</div>
+          <div class="box-item">
+            {{ formattedNumber(configStore.$state.homeList.nodeNumber) }}
+          </div>
+        </div>
+        <div class="functional-box">
+          <div class="box-text">{{ t("Detailed.pool") }}</div>
+          <div class="box-item">
+            {{ formattedNumber(configStore.$state.homeList.poolTotal) }}
+          </div>
+        </div>
+        <div class="functional-box">
+          <div class="box-text">{{ t("Detailed.participant") }}</div>
+          <div class="box-item">
+            {{ formattedNumber(configStore.$state.homeList.authNumber) }}
+          </div>
+        </div>
+        <div class="functional-box">
+          <div class="box-text">{{ t("Detailed.income") }}</div>
+          <div class="box-item">
+            {{ formattedNumber(configStore.$state.homeList.income) }}
+          </div>
+        </div>
+        <div class="functional-area backminning">
+          <div></div>
+          <div></div>
+        </div>
+        <div class="functional-area backheight">
+          <div></div>
+          <div></div>
+        </div>
+      </div>
+      <van-button v-if="!isConnected" class="join-btv" type="warning">{{
+        t("HeightPool.approvetext")
+      }}</van-button>
+    </div>
+    <div class="user-mining">
+      <div class="mining-titles">User Mining Revenue</div>
+      <div class="mining-box">
+        <div class="box-titles">
+          <div>address</div>
+          <div>value</div>
+        </div>
+        <div class="box-line" />
+        <div class="box-contant">
+          <div class="contant-item" v-for="item in testData" :key="item.addr">
+            <div class="item-addr">
+              {{ item.a.substring(0, 4) + "******" + item.a.substring(13, 17) }}
+            </div>
+            <!-- <div class="hrl_usdt">1,15241478.00</div> -->
+            <div class="item-usdt">{{ item.v }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
+
 <script setup>
+import { ref, onMounted, computed } from "vue";
 import {
-  useDisconnect,
-  useSwitchNetwork,
-  useWeb3Modal,
-  useWeb3ModalAccount,
-  useWeb3ModalProvider
-} from "@web3modal/ethers/vue";
-import {
-  BrowserProvider,
-  Contract,
-  formatEther,
-  formatUnits,
-  parseEther
-} from "ethers";
-import { onMounted, reactive, toRef, watch, nextTick } from "vue";
-import BigNumber from "bignumber.js";
-import erc20Abi from "@/assets/abi/erc20.abi.json";
-
-const isLoading = toRef(false);
-const baseInfo = reactive({
-  userBalance: "0.00",
-  signInfo: "",
-  loginType: "0",
-  usdtBalance: ""
-});
-const { disconnect } = useDisconnect();
-const { switchNetwork } = useSwitchNetwork();
-const { walletProvider } = useWeb3ModalProvider();
-const { address, chainId, isConnected } = useWeb3ModalAccount();
-const modal = useWeb3Modal();
-
-// 登录唤起授权签名
-const handleSignUp = function (type) {
-  baseInfo.loginType = type;
-  modal.open({ view: "Connect" });
-};
-// 切换 链
-const handleChangeChain = async function (chainId) {
-  if (chainId != null) {
-    await switchNetwork(chainId);
-    return false;
+  getAssetsImageUrl,
+  truncateString,
+  formattedNumber
+} from "@/utils/index.utils.js";
+import { useI18n } from "vue-i18n";
+import { useConfigStore } from "@/stores/index";
+const configStore = useConfigStore();
+const { t } = useI18n();
+function generateRandomString(length) {
+  const characters =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let result = "";
+  for (let i = 0; i < length; i++) {
+    result += characters.charAt(Math.floor(Math.random() * characters.length));
   }
-  await modal.open({ view: "Networks" });
-  return true;
-};
-
-// 签名信息
-async function onSignMessage() {
-  const provider = new BrowserProvider(walletProvider.value);
-  const signer = await provider.getSigner();
-  return await signer?.signMessage("Hello AppKit Ethers");
-}
-//  查询授权 列表
-const handleAuthTransaction = function () {
-  modal.open({ view: "ApproveTransaction" });
-};
-// 签名
-const handleSignMessage = function () {
-  if (isLoading.value) {
-    return;
-  }
-  isLoading.value = true;
-  onSignMessage()
-    .then(value => {
-      baseInfo.signInfo = value?.toString();
-      isLoading.value = false;
-    })
-    .catch(() => {
-      isLoading.value = false;
-    });
-};
-// 转账
-const handleTransfer = async function () {
-  if (isLoading.value) {
-    return;
-  }
-  isLoading.value = true;
-  const provider = new BrowserProvider(walletProvider.value);
-  const signer = await provider.getSigner();
-  signer
-    ?.sendTransaction({
-      to: "0x49c17e58D3Fe208005dAA0eeD604c663A282EFF9",
-      value: parseEther("0.001")
-    })
-    .then(value => {
-      console.log("value", value);
-      isLoading.value = false;
-    })
-    .catch(() => {
-      isLoading.value = false;
-    });
-};
-// 断开链接
-const loginOut = function () {
-  disconnect();
-};
-const getAddressBalance = async function () {
-  try {
-    if (!address) throw "Account not found.";
-    const provider = new BrowserProvider(walletProvider.value);
-    const balance = await provider.getBalance(address.value);
-    baseInfo.userBalance = new BigNumber(formatEther(balance))
-      .dividedBy(new BigNumber(10).exponentiatedBy(18))
-      .toString();
-  } catch (e) {
-    console.log("error", JSON.stringify(e));
-  }
-};
-async function getBNAuth() {
-  try {
-    if (!address) throw "Account not found.";
-    if (chainId.value != 56) {
-      await handleChangeChain(56);
-    }
-    const bnUsdt = "0x55d398326f99059ff775485246999027b3197955";
-    const provider = new BrowserProvider(walletProvider.value);
-    const tokenContract = new Contract(bnUsdt, erc20Abi, provider);
-    const signer = await provider.getSigner();
-    const dai = 0.01;
-    const allowAmt = await tokenContract.allowance(
-      address.value,
-      tokenContract
-    );
-    const decimals = await tokenContract.decimals();
-    const amount = new BigNumber(dai)
-      .multipliedBy(new BigNumber(10).exponentiatedBy(new BigNumber(decimals)))
-      .toString();
-    // 先获取代币 精度
-    if (
-      parseFloat(formatUnits(allowAmt, decimals)) <= parseInt(String(dai), 10)
-    ) {
-      let singeContractConnect = tokenContract.connect(signer);
-      //@ts-ignore
-      const tx = await singeContractConnect.approve(address.value, amount);
-      await tx.wait();
-    }
-    const singeContractConnect = tokenContract.connect(signer);
-    //@ts-ignore
-    const tx = await singeContractConnect.transfer(
-      amount,
-      "0x49c17e58D3Fe208005dAA0eeD604c663A282EFF9"
-    );
-    await tx.wait();
-  } catch (e) {
-    console.log("error", JSON.stringify(e));
-  }
+  return result;
 }
 
-watch(address, (newValue, oldValue) => {
-  if (newValue !== oldValue && newValue) {
-    if (baseInfo.loginType === "1") {
-      handleSignMessage();
-    }
-    if (baseInfo.loginType === "2") {
-      handleTransfer();
-    }
-    if (baseInfo.loginType === "3") {
-      getBNAuth();
-    }
-    getAddressBalance();
+// 生成随机金额
+function generateRandomAmount() {
+  return (Math.random() * 10000).toFixed(2) + "USDT";
+}
+const testData = computed(() => {
+  const data = [];
+  for (let i = 0; i < 100; i++) {
+    data.push({
+      a: "0x" + generateRandomString(26),
+      v: generateRandomAmount()
+    });
   }
+  return data;
 });
-const initAccount = async function () {
-  try {
-    if (!address.value) {
-      modal.open({ view: "Connect" }).then(value => {
-        console.log(document.getElementsByTagName("w3m-modal"));
-        setTimeout(() => {}, 1000);
-      });
-
-      // if (!isConnected) {
-      // await provider.ge
-      // };
-      // const ethersProvider = new BrowserProvider(walletProvider.value);
-      // const result = await ethersProvider.connect();
-      // console.log("result", result);
-    }
-  } catch (err) {
-    console.log("error", JSON.stringify(err));
-  }
-};
 onMounted(() => {
-  initAccount();
+  console.log(configStore, "configStore");
+  configStore.queryAgentMarketIncome();
 });
 </script>
+<style lang="scss" scoped>
+.home-page {
+  .banner-img {
+    width: 100%;
+    // height: 11.43rem;
+    position: relative;
+
+    .home-notice {
+      background: #00000033;
+      backdrop-filter: blur(10.36px);
+      color: #ffffff;
+      font-family: PingFang SC;
+      font-size: 12.04px;
+      font-weight: 400;
+
+      width: 100%;
+      position: absolute;
+      bottom: 0;
+    }
+  }
+  .home-functional {
+    margin-top: 20.02px;
+    padding: 0 15.96px;
+
+    .functionals {
+      display: grid;
+      grid-gap: 14px 15.96px;
+      grid-template-columns: repeat(2, 1fr);
+      .functional-box {
+        background: #ffffff14;
+        border-radius: 9.94px;
+        border-top: 0.98px solid #ffffff1a;
+        padding: 12.04px;
+        .box-text {
+          font-family: PingFang SC;
+          font-size: 12.04px;
+          font-weight: 400;
+          color: #ffffff99;
+        }
+        .box-item {
+          margin-top: 10px;
+          font-family: DIN;
+          font-size: 18.06px;
+          font-weight: 700;
+          color: #93f504;
+        }
+      }
+      .functional-area {
+        border-radius: 9.94px;
+        height: 93.94px;
+        border: 0.56px solid #ff693e33;
+      }
+      .backminning {
+        background: url("@/assets/images/mining.png") no-repeat center/100%;
+      }
+      .backheight {
+        background: url("@/assets/images/heightpool.png") no-repeat center/100%;
+      }
+    }
+    .join-btv {
+      margin-top: 20.02px;
+      background: #ff693e;
+      width: 100%;
+      height: 40.04px;
+      border: none;
+      font-family: PingFang SC;
+      font-size: 14px;
+      font-weight: 400;
+      color: #ffffff;
+    }
+  }
+  .user-mining {
+    margin-top: 20px;
+    padding: 0 16px;
+    width: 100%;
+    .mining-titles {
+      font-family: PingFang SC;
+      font-size: 16px;
+      font-weight: 400;
+      line-height: 22.4px;
+      color: #ffffff;
+    }
+    .mining-box {
+      margin-top: 16px;
+      height: 308px;
+      border-radius: 10px;
+      border: 0.5px solid #ffffff14;
+      background: #ffffff1a;
+      padding: 12px 10px;
+      .box-titles {
+        display: flex;
+        justify-content: space-between;
+        padding: 0 10px;
+        font-family: PingFang SC;
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 19.6px;
+      }
+      .box-line {
+        margin-top: 10px;
+        width: 100%;
+        height: 1px;
+        background: linear-gradient(
+          90deg,
+          rgba(255, 105, 62, 0) 0%,
+          rgba(255, 105, 62, 0.4) 44.13%,
+          rgba(255, 105, 62, 0) 100%
+        );
+      }
+      .box-contant {
+        .contant-item {
+          display: flex;
+          justify-content: space-between;
+          margin-bottom: 15px;
+          .item-addr {
+            font-family: PingFang SC;
+            font-size: 14px;
+            font-weight: 400;
+            line-height: 19.6px;
+            color: #ffffffcc;
+          }
+          .item-usdt {
+            font-family: DIN;
+            font-size: 14px;
+            font-weight: 500;
+            line-height: 16.95px;
+            color: #ffffff;
+          }
+        }
+      }
+    }
+  }
+}
+</style>

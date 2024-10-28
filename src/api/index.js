@@ -1,2 +1,2 @@
-import * as testApi from "@/api/modules/test.js";
+import * as testApi from "@/api/modules/api.module.js";
 export { testApi };

@@ -4,6 +4,7 @@
 export default {
   bracketSpacing: true,
   singleQuote: false,
+  endOfLine: "auto",
   arrowParens: "avoid",
   trailingComma: "none"
 };

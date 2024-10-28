@@ -11,4 +11,4 @@ pinia.use(piniaPluginPersist);
 export * from "./modules/user.module.js"; // 用户信息
 export * from "./modules/shoppingCart.module.js"; // 购物车
 export * from "./modules/userAppConfig.module.js"; // app 参数配置
-export * from "./modules/config.module.js"; // app 参数配置
+export * from "./modules/config.module.js"; // 通用接口
