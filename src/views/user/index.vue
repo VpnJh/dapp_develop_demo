@@ -1,6 +1,6 @@
 <template>
   <div>
-    <img :src="getAssetsImageUrl('login_image')" alt="" />
+    <img v-lazy="getAssetsImageUrl('/login_image.png')" alt="" />
   </div>
 </template>
 <script setup>
