@@ -8,14 +8,19 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     AppScrollList: typeof import('./src/components/appScrollList/AppScrollList.vue')['default']
+    Footer: typeof import('./src/components/footer/index.vue')['default']
     Header: typeof import('./src/components/header/index.vue')['default']
     Popup: typeof import('./src/components/popup/popup.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     VanButton: typeof import('vant/es')['Button']
+    VanField: typeof import('vant/es')['Field']
     VanIcon: typeof import('vant/es')['Icon']
     VanLoading: typeof import('vant/es')['Loading']
     VanNoticeBar: typeof import('vant/es')['NoticeBar']
+    VanPopup: typeof import('vant/es')['Popup']
     VanRollingText: typeof import('vant/es')['RollingText']
+    VanTabbar: typeof import('vant/es')['Tabbar']
+    VanTabbarItem: typeof import('vant/es')['TabbarItem']
   }
 }

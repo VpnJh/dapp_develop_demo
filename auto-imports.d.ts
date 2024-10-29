@@ -7,4 +7,6 @@
 export {}
 declare global {
   const showFailToast: typeof import('vant/es')['showFailToast']
+  const showLoadingToast: typeof import('vant/es')['showLoadingToast']
+  const showSuccessToast: typeof import('vant/es')['showSuccessToast']
 }

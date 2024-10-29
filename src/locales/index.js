@@ -31,7 +31,7 @@ const i18n = createI18n({
 // 实例化i18
 const loadedLanguages = ["en"]; // our default language that is preloaded
 
-function setI18nLanguage(lang) {
+export function setI18nLanguage(lang) {
   i18n.locale = lang;
   console.log("i18n", i18n);
   const appConfig = useAppConfigStore();

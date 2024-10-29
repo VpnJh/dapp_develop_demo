@@ -85,19 +85,19 @@ const router = createRouter({
       }
     },
     {
-      path: "/home2",
-      name: "home2",
-      component: import("../views/home2/index.vue"),
+      path: "/serve",
+      name: "servePage",
+      component: import("../views/servePage/index.vue"),
       meta: {
-        title: "链调试功能demo2"
+        title: "服务"
       }
     },
     {
-      path: "/user",
-      name: "user",
-      component: lazyLoad("user/index"),
+      path: "/team",
+      name: "TeamPage",
+      component: lazyLoad("team/index"),
       meta: {
-        title: "AppList"
+        title: "团队"
       }
     },
     {

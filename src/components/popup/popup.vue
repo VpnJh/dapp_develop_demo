@@ -13,7 +13,7 @@
     <div
       :class="[type, ani, animation ? 'ani' : '', !custom ? 'apex-custom' : '']"
       class="apex-popup__wrapper"
-      @click="close(true)"
+      @click="close(true)" 
     >
       <div
         :style="{ 'background-color': bgColor ,'border-radius': borderRadius}"
