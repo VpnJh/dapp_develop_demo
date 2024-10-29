@@ -8,7 +8,7 @@ export const THEMEENUM = Object.freeze({
 export const useAppConfigStore = defineStore("appConfig", {
   state: () => ({
     theme: THEMEENUM.light,
-    lang: "en",
+    lang: "en-US",
     chatBlock: false
   }),
   getters: {

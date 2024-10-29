@@ -1,5 +1,13 @@
 import { createI18n } from "vue3-i18n";
-import messages from "@/locales/lang/zh-CN.json";
+import enUS from "@/locales/lang/en-US.json";
+import zhCN from "@/locales/lang/zh-CN.json";
+import zhTW from "@/locales/lang/zh-TW.json";
+import ptPT from "@/locales/lang/pt-PT.json";
+import plPL from "@/locales/lang/pl-PL.json";
+import frFR from "@/locales/lang/fr-FR.json";
+import esES from "@/locales/lang/es-ES.json";
+import deDE from "@/locales/lang/de-DE.json";
+import arSA from "@/locales/lang/ar-SA.json";
 import { useAppConfigStore } from "@/stores";
 export const supportLanguages = [
   "en-US",
@@ -25,14 +33,23 @@ const i18n = createI18n({
   globalInjection: true,
   availableLocales: supportLanguages,
   messages: {
-    en: messages
+    "en-US": enUS,
+    "zh-CN": zhCN,
+    "zh-TW": zhTW,
+    "pt-PT": ptPT,
+    "pl-PL": plPL,
+    "fr-FR": frFR,
+    "es-ES": esES,
+    "de-DE": deDE,
+    "ar-SA": arSA
   }
 });
 // 实例化i18
-const loadedLanguages = ["en"]; // our default language that is preloaded
+// const loadedLanguages = ["en-US"]; // our default language that is preloaded
 
 export function setI18nLanguage(lang) {
-  i18n.locale = lang;
+  i18n.setLocale(lang);
+  console.log("lang", lang);
   console.log("i18n", i18n);
   const appConfig = useAppConfigStore();
   appConfig.changeLang(lang.toString());
@@ -43,21 +60,20 @@ export function setI18nLanguage(lang) {
 
 export function loadLanguageAsync(lang) {
   // If the same language
-  if (i18n.locale === lang) {
-    return Promise.resolve(setI18nLanguage(lang));
-  }
+  return Promise.resolve(setI18nLanguage(lang));
 
   // If the language was already loaded
-  if (loadedLanguages.includes(lang)) {
-    return Promise.resolve(setI18nLanguage(lang));
-  }
-  const modules = import.meta.glob("@/locales/lang/*.ts", { eager: false });
-  // If the language hasn't been loaded yet
-  return modules[`/src/locales/lang/${lang}.ts`]().then(messages => {
-    i18n.global.setLocaleMessage(lang, messages.default);
-    loadedLanguages.push(lang);
-    return setI18nLanguage(lang);
-  });
+  // if (loadedLanguages.includes(lang)) {
+  //   return Promise.resolve(setI18nLanguage(lang));
+  // }
+  // const modules = import.meta.glob("@/locales/lang/*.json", { eager: false });
+  // // If the language hasn't been loaded yet
+  // return modules[`/src/locales/lang/${lang}.json`]().then(messages => {
+  //   // i18n.global.setLocaleMessage(lang, messages.default);
+  //   // i18n.setLocaleMessage(lang, messages.default);
+  //   loadedLanguages.push(lang);
+  //   return setI18nLanguage(lang);
+  // });
 }
 
 export default i18n;
