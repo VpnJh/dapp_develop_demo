@@ -46,7 +46,14 @@
         </span>
       </div>
       <div class="language" @click="languageShow = true">
-        <img v-lazy="getAssetsImageUrl('/language.png')" alt="" />
+        <img
+          v-lazy="
+            currentLang
+              ? getAssetsImageUrl(`/languageIcon/${currentLang}.png`)
+              : getAssetsImageUrl('/language.png')
+          "
+          alt=""
+        />
       </div>
     </div>
     <van-popup v-model:show="languageShow" round class="language-popup">
@@ -97,7 +104,9 @@ import { testApi } from "@/api/index";
 import { useConfigStore } from "@/stores/index";
 const configStore = useConfigStore();
 import { useI18n } from "vue3-i18n";
-const { t } = useI18n();
+const { t, getLocale } = useI18n();
+
+const currentLang = computed(() => getLocale() || "");
 const baseInfo = reactive({
   userBalance: "0.00",
   signInfo: "",

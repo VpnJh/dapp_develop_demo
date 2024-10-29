@@ -124,7 +124,7 @@ import {
   useWeb3ModalAccount,
   useWeb3ModalProvider
 } from "@web3modal/ethers/vue";
-import { BrowserProvider } from "ethers";
+import { BrowserProvider, Contract } from "ethers";
 const { walletProvider } = useWeb3ModalProvider();
 const { address, chainId } = useWeb3ModalAccount();
 import BigNumber from "bignumber.js";
