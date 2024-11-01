@@ -4,7 +4,11 @@
       <template #icon>
         <van-icon name="star-o" size="30" />
       </template>
-      加载中...
+      {{ t("authorizationPending") }}
     </van-loading>
   </div>
 </template>
+<script setup>
+import { useI18n } from "vue3-i18n";
+const { t } = useI18n();
+</script>

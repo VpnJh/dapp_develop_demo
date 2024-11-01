@@ -24,7 +24,7 @@
         <img :src="props.active ? icon.teamActive : icon.team" />
       </template>
     </van-tabbar-item>
-    <van-tabbar-item>
+    <van-tabbar-item replace to="/user">
       <span>{{ t("HeightPool.my") }}</span>
       <template #icon="props">
         <img :src="props.active ? icon.myActive : icon.myIcon" />
@@ -34,18 +34,27 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, watch, onMounted } from "vue";
 const menuActive = ref(0);
 import { useI18n } from "vue3-i18n";
 const { t } = useI18n();
-import {
-  getAssetsImageUrl,
-  truncateString,
-  formattedNumber
-} from "@/utils/index.utils.js";
-import { useRoute, useRouter } from "vue-router";
+import { getAssetsImageUrl } from "@/utils/index.utils.js";
+import { useRoute } from "vue-router";
 const route = useRoute();
-const router = useRouter();
+watch(route, (to, from) => {
+  const pathMappings = {
+    "/home": 0,
+    "/serve": 1,
+    "/team": 2,
+    "/user": 3
+  };
+  for (const path in pathMappings) {
+    if (route.path.includes(path)) {
+      menuActive.value = pathMappings[path];
+      break;
+    }
+  }
+});
 const icon = {
   home: getAssetsImageUrl("/homeiconImg.png"),
   homeActive: getAssetsImageUrl("/homeiconActive.png"),
@@ -56,6 +65,20 @@ const icon = {
   myIcon: getAssetsImageUrl("/myImg.png"),
   myActive: getAssetsImageUrl("/myActive.png")
 };
+onMounted(() => {
+  const pathMappings = {
+    "/home": 0,
+    "/serve": 1,
+    "/team": 2,
+    "/user": 3
+  };
+  for (const path in pathMappings) {
+    if (route.path.includes(path)) {
+      menuActive.value = pathMappings[path];
+      break;
+    }
+  }
+});
 </script>
 <style lang="scss" scoped>
 .footers {

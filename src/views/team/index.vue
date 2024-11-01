@@ -8,9 +8,13 @@
         <div class="icon-text">{{ t("MyTeam.inviteCode") }}</div>
       </div>
 
-      <van-button class="team-del-btv" plain type="success">{{
-        t("MyTeam.myTeam")
-      }}</van-button>
+      <van-button
+        class="team-del-btv"
+        plain
+        type="success"
+        @click="goToPage('Team Details')"
+        >{{ t("MyTeam.myTeam") }}</van-button
+      >
     </div>
     <div class="my-team">
       <div class="myTeam-item">
@@ -97,7 +101,7 @@ import { ref, onMounted, watch } from "vue";
 import { testApi } from "@/api/index";
 import { useConfigStore } from "@/stores/index";
 const configStore = useConfigStore();
-import { getAssetsImageUrl } from "@/utils/index.utils.js";
+import { getAssetsImageUrl, goToPage } from "@/utils/index.utils.js";
 import { useWeb3ModalAccount } from "@web3modal/ethers/vue";
 const { address, chainId, isConnected } = useWeb3ModalAccount();
 import { useI18n } from "vue3-i18n";
@@ -143,13 +147,13 @@ const copyText = async text => {
     await toClipboard(text);
     showSuccessToast("copy-success");
   } catch (e) {
-    console.log(e);
+    /* empty */
   }
 };
 </script>
 <style lang="scss" scoped>
 .teamPage {
-  padding: 1.14rem 1.14rem 6rem;
+  padding: 1.29rem 1.14rem 6rem;
   border-top: 0.04rem solid #ffffff1a;
   .team-title {
     display: flex;

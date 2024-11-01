@@ -69,35 +69,71 @@ const router = createRouter({
       redirect: "/home"
     },
     {
-      path: "/test",
-      name: "test",
-      component: lazyLoad("test/index"),
+      path: "/home",
+      name: "homePage",
+      component: lazyLoad("home/index"),
+      meta: {}
+    },
+    {
+      path: "/home/advancedMining",
+      name: "Advanced Mining",
+      component: lazyLoad("home/components/advancedMining"),
       meta: {
-        title: "test"
+        hiddenHeader: true, //是否隐藏头部
+        hiddenFooter: false //是否隐藏底部菜单
       }
     },
     {
-      path: "/home",
-      name: "home",
-      component: import("../views/home/index.vue"),
+      path: "/home/liquidityMining",
+      name: "Liquidity Mining",
+      component: lazyLoad("home/components/liquidityMining"),
       meta: {
-        title: "首页"
+        hiddenHeader: true, //是否隐藏头部
+        hiddenFooter: false //是否隐藏底部菜单
       }
     },
     {
       path: "/serve",
       name: "servePage",
-      component: import("../views/servePage/index.vue"),
-      meta: {
-        title: "服务"
-      }
+      component: lazyLoad("servePage/index"),
+      meta: {}
     },
     {
       path: "/team",
       name: "TeamPage",
       component: lazyLoad("team/index"),
+      meta: {}
+    },
+    {
+      path: "/team/teamdetails",
+      name: "Team Details",
+      component: lazyLoad("team/components/teamDel"),
       meta: {
-        title: "团队"
+        hiddenHeader: true, //是否隐藏头部
+        hiddenFooter: false //是否隐藏底部菜单
+      }
+    },
+    {
+      path: "/user",
+      name: "UserPage",
+      component: lazyLoad("userPage/index")
+    },
+    {
+      path: "/user/withdrawaldetails",
+      name: "Withdrawal Details",
+      component: lazyLoad("userPage/components/withdrawalDel"),
+      meta: {
+        hiddenHeader: true, //是否隐藏头部
+        hiddenFooter: false //是否隐藏底部菜单
+      }
+    },
+    {
+      path: "/user/taskcenter",
+      name: "Task Center",
+      component: lazyLoad("userPage/components/taskCenter"),
+      meta: {
+        hiddenHeader: true, //是否隐藏头部
+        hiddenFooter: false //是否隐藏底部菜单
       }
     },
     {
@@ -111,12 +147,11 @@ const router = createRouter({
     {
       path: "/notFound",
       name: "notFound",
-      component: () => import("../views/notFound/index.vue")
-    },
-    {
-      path: "/*",
-      name: "all",
-      redirect: "/notFound"
+      component: lazyLoad("notFound/index"),
+      meta: {
+        hiddenHeader: false, //是否隐藏头部
+        hiddenFooter: false //是否隐藏底部菜单
+      }
     }
   ]
 });
@@ -141,7 +176,7 @@ router.beforeEach((to, from, next) => {
 router.afterEach((to, from) => {
   console.warn("from ::: ", from);
   console.warn("to ::: ", to);
-  document.title = (to.meta.title ?? "").toString();
+  // document.title = (to.meta.title ?? "").toString();
 });
 
 export default router;

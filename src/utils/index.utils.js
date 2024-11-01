@@ -1,3 +1,4 @@
+import router from "@/router/index.js";
 export const getAssetsImageUrl = pathName => {
   try {
     let pngImages = {};
@@ -32,10 +33,13 @@ export const getAssetsImageUrl = pathName => {
     return "";
   }
 };
-export const truncateString = (str, pointLength = 5) => {
+export function goToPage(pageName) {
+  router.push({ name: pageName });
+}
+export const truncateString = (str, pointLength = 3) => {
   if (!str) return str;
   const points = ".".repeat(pointLength);
-  return str.replace(/(^.{4})(.*)(.{4}$)/, `$1${points}$3`);
+  return str.replace(/(^.{5})(.*)(.{5}$)/, `$1${points}$3`);
 };
 export const formattedNumber = number => {
   return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");

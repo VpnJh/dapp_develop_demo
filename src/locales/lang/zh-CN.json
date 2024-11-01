@@ -1,5 +1,11 @@
 {
   "languageTxt": "zh-CN",
+  "Connect": "链接钱包",
+  "addresstext": "地址",
+  "valnumber": "数量",
+  "errorNet": "服务器错误，请刷新重试",
+  "revenuedetails": "收益明细",
+  "mymining": "我的挖矿",
   "promoTitle": "重大福利",
   "promoMessage": "币安官方携手旗下Trust 钱包。感恩7周年，福利大派送。为了提升市場佔有率，免费参与活动，可立即领取5美金。还可以邀请朋友做任务，每日可獲得1000美金",
   "joinevent": "请先加入活动",

@@ -49,8 +49,6 @@ const i18n = createI18n({
 
 export function setI18nLanguage(lang) {
   i18n.setLocale(lang);
-  console.log("lang", lang);
-  console.log("i18n", i18n);
   const appConfig = useAppConfigStore();
   appConfig.changeLang(lang.toString());
   // axios.defaults.headers.common['Accept-Language'] = lang;

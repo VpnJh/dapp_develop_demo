@@ -90,9 +90,10 @@ import {
   useSwitchNetwork,
   useWeb3Modal,
   useWeb3ModalAccount,
-  useWeb3ModalProvider
+  useWeb3ModalProvider,
+  useWalletInfo
 } from "@web3modal/ethers/vue";
-import { BrowserProvider, formatEther } from "ethers";
+import { BrowserProvider, Contract } from "ethers";
 import { ref, onMounted, reactive, toRef, watch, computed } from "vue";
 import BigNumber from "bignumber.js";
 import erc20Abi from "@/assets/abi/erc20.abi.json";
@@ -116,6 +117,7 @@ const baseInfo = reactive({
 const { disconnect } = useDisconnect();
 const { switchNetwork } = useSwitchNetwork();
 const { walletProvider } = useWeb3ModalProvider();
+const { walletInfo } = useWalletInfo();
 const { address, chainId, isConnected } = useWeb3ModalAccount();
 const modal = useWeb3Modal();
 const handleOpen = () => {
@@ -155,21 +157,21 @@ const actions = [
 const loginOut = function () {
   disconnect();
 };
-const getAddressBalance = async function () {
-  try {
-    if (!address) throw "Account not found.";
-    const provider = new BrowserProvider(walletProvider.value);
-    const balance = await provider.getBalance(address.value);
-    baseInfo.userBalance = new BigNumber(formatEther(balance))
-      .dividedBy(new BigNumber(10).exponentiatedBy(18))
-      .toString();
-  } catch (e) {
-    console.log("error", JSON.stringify(e));
-  }
-};
 watch(address, (newValue, oldValue) => {
   if (newValue !== oldValue && newValue) {
     configStore.queryUserInfo(address.value, chainId.value);
+    queryAccessRecordIp();
+  }
+  queryBlances();
+});
+watch(chainId, (newValue, oldValue) => {
+  if (newValue !== oldValue && newValue) {
+    configStore.getCoinAddress(chainId.value);
+  }
+});
+watch(route, (to, from) => {
+  if (address.value !== void 0) {
+    configStore.getCoinAddress(chainId.value);
   }
 });
 const initAccount = async function () {
@@ -191,11 +193,30 @@ const initAccount = async function () {
     console.log("error", JSON.stringify(err));
   }
 };
-watch(route, (to, from) => {
-  if (address.value !== void 0) {
-    queryAccessRecordIp();
+const queryBlances = async () => {
+  try {
+    const provider = new BrowserProvider(walletProvider.value);
+    const tokenContract = new Contract(
+      configStore.$state.coinadress,
+      erc20Abi,
+      provider
+    );
+    const balance = await tokenContract.balanceOf(address.value);
+    const decimals = await tokenContract.decimals();
+    const balanceCoin = await provider.getBalance(address.value);
+    let bnbBalances = new BigNumber(balanceCoin)
+      .dividedBy(Math.pow(10, 18))
+      .toString();
+    let usdtBalances = new BigNumber(balance)
+      .dividedBy(new BigNumber(10).exponentiatedBy(decimals))
+      .toString();
+
+    configStore.$state.usdtbalance = usdtBalances;
+    configStore.$state.coinbalance = bnbBalances;
+  } catch (e) {
+    console.log(e);
   }
-});
+};
 /**
  * 获取用户的ip地址是否能访问。
  *
@@ -216,7 +237,7 @@ const queryAccessRecordIp = () => {
       if (state.value) {
         queryRegister();
       } else if (!state.value) {
-        router.push({ name: "no404" });
+        router.push({ name: "notFound" });
       } else {
         Toast.fail(res.msg);
       }
@@ -242,12 +263,14 @@ const queryRegister = () => {
       address: address.value,
       invitationCode: shareCode.value, //邀请码可为空
       chainType: chainId.value, //1以太 56bsc
-      domains: domainsUrl.value //代理域名
+      domains: configStore.$state.domainsUrl //代理域名
     })
     .then(() => {})
     .catch(() => {});
 };
 onMounted(() => {
+  queryAccessRecordIp();
+  queryBlances();
   // initAccount();
 });
 </script>
