@@ -58,7 +58,7 @@ export default ({ mode }) => {
     },
     build: {
       // https://cn.vitejs.dev/guide/build.html#browser-compatibility
-      target: "es2015",
+      target: "esnext",
       sourcemap: false,
       // 消除打包大小超过500kb警告
       chunkSizeWarningLimit: 4000,
