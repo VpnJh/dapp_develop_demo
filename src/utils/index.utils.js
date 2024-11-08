@@ -44,3 +44,14 @@ export const truncateString = (str, pointLength = 3) => {
 export const formattedNumber = number => {
   return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 };
+export const convertDateTimeToDate = dateTimeString => {
+  const dateTime = new Date(dateTimeString);
+  if (isNaN(dateTime)) {
+    // 输入的日期时间字符串无效
+    return null;
+  }
+  const year = dateTime.getFullYear();
+  const month = String(dateTime.getMonth() + 1).padStart(2, "0"); // 月份从0开始，需要加1
+  const day = String(dateTime.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};

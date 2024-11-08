@@ -4,29 +4,18 @@
       <div class="goback" @click="router.go(-1)">
         <img v-lazy="getAssetsImageUrl('/goback.png')" alt="" />
       </div>
-      <div class="title-text">{{ t("Detailed.withdrawals") }}</div>
+      <div class="title-text">{{ t("revenuedetails") }}</div>
     </div>
     <div class="del-box">
       <div class="box-title">
         <div class="title-item">{{ t("Detailed.date") }}</div>
         <div class="title-item">{{ t("Detailed.amount") }} (USDT)</div>
-        <div class="title-item">{{ t("Detailed.status") }}</div>
       </div>
       <div class="box-line" />
-      <div v-if="withdrawDelList" class="del-list">
-        <div
-          v-for="(item, index) in withdrawDelList"
-          :key="index"
-          class="list-item"
-        >
-          <div>{{ item.createTime.substring(0, 10) }}</div>
-          <div class="list-balance">{{ item.balance }}</div>
-          <div
-            class="list-status"
-            :style="{ color: getStatusColor(item.status) }"
-          >
-            {{ getStatusMessage(item.status) }}
-          </div>
+      <div v-if="incomeList" class="del-list">
+        <div v-for="(item, index) in incomeList" :key="index" class="list-item">
+          <div>{{ convertDateTimeToDate(item.time) }}</div>
+          <div class="list-balance">{{ item.amount }} (USDT)</div>
         </div>
       </div>
       <div v-else class="del-nodata">{{t('nodata')}}</div>
@@ -36,7 +25,10 @@
 
 <script setup>
 import { onMounted, ref } from "vue";
-import { getAssetsImageUrl } from "@/utils/index.utils.js";
+import {
+  getAssetsImageUrl,
+  convertDateTimeToDate
+} from "@/utils/index.utils.js";
 import { useI18n } from "vue3-i18n";
 const { t } = useI18n();
 import { useRouter } from "vue-router";
@@ -46,23 +38,8 @@ import { useWeb3ModalAccount } from "@web3modal/ethers/vue";
 const { address, chainId, isConnected } = useWeb3ModalAccount();
 import useStatusPup from "@/hooks/index";
 const { loadStatus } = useStatusPup();
-const withdrawDelList = ref(null);
+const incomeList = ref(null);
 
-const getStatusMessage = status =>
-  ({
-    1: t("Detailed.success"),
-    2: t("Detailed.fail")
-  })[status] || t("Detailed.unaudited");
-const getStatusColor = status => {
-  switch (status) {
-    case 1:
-      return "#5BCF50";
-    case 2:
-      return "#E23B3B";
-    default:
-      return "#FF693E";
-  }
-};
 /**
  * 获取提现明细。
  *
@@ -71,16 +48,17 @@ const getStatusColor = status => {
  * @param {String} chainType - 链类型1以太 56bsc。
  * @returns {Object} - 返回提现明细列表。
  */
-const queryWithdrawList = () => {
+const queryUserIncomeList = () => {
   loadStatus.value = true;
   testApi
-    .getWithdrawList({
+    .getUserIncomeList({
       address: address.value,
+      // chainType: '1'
       chainType: chainId.value
     })
     .then(res => {
       if (res.code === 200) {
-        withdrawDelList.value = res.data.data;
+        incomeList.value = res.data;
         loadStatus.value = false;
       } else {
         showFailToast(res.msg);
@@ -92,7 +70,7 @@ const queryWithdrawList = () => {
     });
 };
 onMounted(() => {
-  queryWithdrawList();
+  queryUserIncomeList();
 });
 </script>
 
@@ -149,8 +127,8 @@ onMounted(() => {
       height: 73vh;
       overflow-y: auto;
       .list-item {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
+        display: flex;
+        justify-content: space-between;
         font-family: DIN;
         font-size: 0.86rem;
         font-weight: 500;

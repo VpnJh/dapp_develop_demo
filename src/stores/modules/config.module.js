@@ -32,7 +32,7 @@ export const useConfigStore = defineStore("appConfigModule", {
     },
     setDomainsUrl() {
       this.domainsUrl = window.location.host.includes("localhost")
-        ? "1012.austdchainz.top"
+        ? "https://crypto-btc.tech/"
         : window.location.host;
     },
     queryAgentMarketIncome() {

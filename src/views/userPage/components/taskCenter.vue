@@ -115,8 +115,9 @@ const { t } = useI18n();
 import { useRouter } from "vue-router";
 const router = useRouter();
 import { testApi } from "@/api/index";
-import { useAppConfigStore } from "@/stores/index";
+import { useAppConfigStore, useConfigStore } from "@/stores/index";
 const languagesKey = useAppConfigStore();
+const configStore = useConfigStore();
 import useStatusPup from "@/hooks/index";
 const { loadStatus } = useStatusPup();
 const captionLevels = ref({});
@@ -146,7 +147,9 @@ const getLocalizedTitle = (item, langvif) => {
 const queryAgentTasks = async () => {
   loadStatus.value = true;
   try {
-    const res = await testApi.getAgentTasks({ domains: "crypto-btc.tech" });
+    const res = await testApi.getAgentTasks({
+      domains: configStore.$state.domainsUrl
+    });
     loadStatus.value = false;
     if (res.code === 200) {
       captionLevels.value = res.data.captionLevels;

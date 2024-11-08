@@ -145,7 +145,7 @@ const copyText = async text => {
   try {
     if (!text) return;
     await toClipboard(text);
-    showSuccessToast("copy-success");
+    showSuccessToast(t("copysuccess"));
   } catch (e) {
     /* empty */
   }

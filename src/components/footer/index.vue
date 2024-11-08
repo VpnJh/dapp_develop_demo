@@ -5,26 +5,26 @@
     :safe-area-inset-bottom="true"
     :border="false"
   >
-    <van-tabbar-item replace to="/home">
+    <van-tabbar-item @click="goRouters('homePage', false)">
       <span>{{ t("HeightPool.home") }}</span>
       <template #icon="props">
         <img :src="props.active ? icon.homeActive : icon.home" />
       </template>
     </van-tabbar-item>
-    <van-tabbar-item replace to="/serve">
+    <van-tabbar-item @click="goRouters('servePage', false)">
       <span>{{ t("HeightPool.service") }}</span>
       <template #icon="props">
         <img :src="props.active ? icon.serveActive : icon.serve" />
       </template>
     </van-tabbar-item>
 
-    <van-tabbar-item replace to="/team">
+    <van-tabbar-item @click="goRouters('TeamPage', true)">
       <span>{{ t("HeightPool.team") }}</span>
       <template #icon="props">
         <img :src="props.active ? icon.teamActive : icon.team" />
       </template>
     </van-tabbar-item>
-    <van-tabbar-item replace to="/user">
+    <van-tabbar-item @click="goRouters('UserPage', true)">
       <span>{{ t("HeightPool.my") }}</span>
       <template #icon="props">
         <img :src="props.active ? icon.myActive : icon.myIcon" />
@@ -39,8 +39,12 @@ const menuActive = ref(0);
 import { useI18n } from "vue3-i18n";
 const { t } = useI18n();
 import { getAssetsImageUrl } from "@/utils/index.utils.js";
-import { useRoute } from "vue-router";
+import { useWeb3Modal, useWeb3ModalAccount } from "@web3modal/ethers/vue";
+const modal = useWeb3Modal();
+const { address, chainId, isConnected } = useWeb3ModalAccount();
+import { useRoute, useRouter } from "vue-router";
 const route = useRoute();
+const router = useRouter();
 watch(route, (to, from) => {
   const pathMappings = {
     "/home": 0,
@@ -55,6 +59,19 @@ watch(route, (to, from) => {
     }
   }
 });
+
+const goRouters = (item, type) => {
+  if (address.value === undefined && type) {
+    modal.open();
+    menuActive.value = route.path.includes("/serve")
+      ? 1
+      : route.path.includes("/home")
+        ? 0
+        : menuActive.value;
+  } else {
+    router.push({ name: item });
+  }
+};
 const icon = {
   home: getAssetsImageUrl("/homeiconImg.png"),
   homeActive: getAssetsImageUrl("/homeiconActive.png"),

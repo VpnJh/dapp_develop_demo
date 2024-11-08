@@ -179,8 +179,8 @@ onMounted(() => {
   .mining-box {
     padding: 1.14rem;
     .mining-threshold {
-      border-top: 0.07rem solid #ff693e66;
-      background: #ffffff1a;
+      background: url("@/assets/images/homeImg/advancedsbg.png") no-repeat
+        center/100%;
       height: 9.57rem;
       padding: 1.29rem 1rem;
       display: flex;

@@ -1,7 +1,9 @@
 import axios from "axios";
+import { showFailToast } from "vant";
+import i18n from "@/locales/index.js";
 // 创建 Axios 实例
 const axiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_URL, // 替换为你的 API 基础 URL
+  baseURL: "/", // 替换为你的 API 基础 URL
   timeout: 10000, // 请求超时时间
   headers: {
     "Content-Type": "application/x-www-form-urlencoded"
@@ -19,6 +21,8 @@ axiosInstance.interceptors.request.use(
     return config;
   },
   error => {
+    const errorMessage = i18n.global.t("errorNet"); // 假设你有一个定义的key叫 'error.network'
+    showFailToast(errorMessage);
     return Promise.reject(error);
   }
 );
@@ -30,8 +34,6 @@ axiosInstance.interceptors.response.use(
     return response;
   },
   error => {
-    // 对响应错误做些什么
-    console.error("API Error:", error);
     return Promise.reject(error.response ? error.response.data : error);
   }
 );

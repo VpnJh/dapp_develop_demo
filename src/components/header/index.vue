@@ -23,7 +23,7 @@
         class="wall-connect"
         type="warning"
         @click="handleOpen()"
-        >Connect</van-button
+        >{{ t("Connect") }}</van-button
       >
       <div
         v-if="isConnected"
@@ -71,13 +71,18 @@
           class="language-item"
           @click="onSelect(item)"
         >
-          <div class="img-lang">
-            <img
-              v-lazy="getAssetsImageUrl(`/languageIcon/${item.value}.png`)"
-              alt=""
-            />
+          <div class="language-select">
+            <div class="img-lang">
+              <img
+                v-lazy="getAssetsImageUrl(`/languageIcon/${item.value}.png`)"
+                alt=""
+              />
+            </div>
+            <div class="langs-text">{{ item.text }}</div>
           </div>
-          <div class="langs-text">{{ item.text }}</div>
+          <div v-if="item.value == currentLang" class="on-right">
+            <img v-lazy="getAssetsImageUrl('/onright.png')" alt="" />
+          </div>
         </div>
       </div>
     </van-popup>
@@ -94,31 +99,28 @@ import {
   useWalletInfo
 } from "@web3modal/ethers/vue";
 import { BrowserProvider, Contract } from "ethers";
-import { ref, onMounted, reactive, toRef, watch, computed } from "vue";
+import { ref, onMounted, watch, computed, onBeforeMount } from "vue";
 import BigNumber from "bignumber.js";
 import erc20Abi from "@/assets/abi/erc20.abi.json";
-import { getAssetsImageUrl, truncateString } from "@/utils/index.utils.js";
+import {
+  getAssetsImageUrl,
+  truncateString,
+  goToPage
+} from "@/utils/index.utils.js";
 import { setI18nLanguage } from "@/locales/index.js";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 const route = useRoute();
+const router = useRouter();
 import { testApi } from "@/api/index";
 import { useConfigStore } from "@/stores/index";
 const configStore = useConfigStore();
 import { useI18n } from "vue3-i18n";
 const { t, getLocale } = useI18n();
-
 const currentLang = computed(() => getLocale() || "");
-const baseInfo = reactive({
-  userBalance: "0.00",
-  signInfo: "",
-  loginType: "0",
-  usdtBalance: ""
-});
 const { disconnect } = useDisconnect();
 const { switchNetwork } = useSwitchNetwork();
 const { walletProvider } = useWeb3ModalProvider();
-const { walletInfo } = useWalletInfo();
-const { address, chainId, isConnected } = useWeb3ModalAccount();
+const { address, chainId, isConnected, status } = useWeb3ModalAccount();
 const modal = useWeb3Modal();
 const handleOpen = () => {
   modal.open();
@@ -158,15 +160,19 @@ const loginOut = function () {
   disconnect();
 };
 watch(address, (newValue, oldValue) => {
+  if (address.value == void 0) {
+    goToPage("homePage");
+  }
   if (newValue !== oldValue && newValue) {
     configStore.queryUserInfo(address.value, chainId.value);
-    queryAccessRecordIp();
+    queryRegister();
   }
   queryBlances();
 });
 watch(chainId, (newValue, oldValue) => {
-  if (newValue !== oldValue && newValue) {
+  if (newValue !== oldValue && newValue && oldValue) {
     configStore.getCoinAddress(chainId.value);
+    queryRegister();
   }
 });
 watch(route, (to, from) => {
@@ -181,13 +187,6 @@ const initAccount = async function () {
         console.log(document.getElementsByTagName("w3m-modal"));
         setTimeout(() => {}, 1000);
       });
-
-      // if (!isConnected) {
-      // await provider.ge
-      // };
-      // const ethersProvider = new BrowserProvider(walletProvider.value);
-      // const result = await ethersProvider.connect();
-      // console.log("result", result);
     }
   } catch (err) {
     console.log("error", JSON.stringify(err));
@@ -217,33 +216,6 @@ const queryBlances = async () => {
     console.log(e);
   }
 };
-/**
- * 获取用户的ip地址是否能访问。
- *
- * @function getAccessRecordIp
- * @param {String} address - 钱包地址。
- * @param {String} domainsUrl - 使用当前浏览器地址。
- * @returns {Boolean} - 返回true和false。
- */
-const state = ref(true);
-const queryAccessRecordIp = () => {
-  testApi
-    .getAccessRecordIp({
-      address: address.value,
-      domains: configStore.$state.domainsUrl
-    })
-    .then(res => {
-      state.value = res.data;
-      if (state.value) {
-        queryRegister();
-      } else if (!state.value) {
-        router.push({ name: "notFound" });
-      } else {
-        Toast.fail(res.msg);
-      }
-    })
-    .catch(() => {});
-};
 
 /**
  * 注册接口。
@@ -269,9 +241,13 @@ const queryRegister = () => {
     .catch(() => {});
 };
 onMounted(() => {
-  queryAccessRecordIp();
   queryBlances();
+  console.log(isConnected, "isConnected");
+  console.log(status, "status");
   // initAccount();
+});
+onBeforeMount(() => {
+  // localStorage.clear();
 });
 </script>
 
@@ -298,7 +274,7 @@ onMounted(() => {
     display: flex;
     align-items: center;
     .wall-connect {
-      width: 5.71rem;
+      // width: 5.71rem;
       height: 2.15rem;
       border-radius: 1.5rem;
       font-family: Inter;
@@ -396,23 +372,35 @@ onMounted(() => {
       min-width: 124.04px;
       display: flex;
       align-items: center;
+      justify-content: space-between;
       background: #ffffff1a;
       border: 0.07rem solid #ffffff33;
       border-radius: 0.71rem;
       padding: 0.57rem;
-      .img-lang {
-        width: 1.43rem;
+      .language-select {
+        display: flex;
+        align-items: center;
+
+        .img-lang {
+          width: 1.43rem;
+          > img {
+            width: 100%;
+          }
+        }
+        .langs-text {
+          margin-left: 0.71rem;
+          font-family: PingFang SC;
+          font-size: 0.86rem;
+          font-weight: 400;
+          line-height: 1.2rem;
+          color: #ffffff;
+        }
+      }
+      .on-right {
+        width: 1.14rem;
         > img {
           width: 100%;
         }
-      }
-      .langs-text {
-        margin-left: 0.71rem;
-        font-family: PingFang SC;
-        font-size: 0.86rem;
-        font-weight: 400;
-        line-height: 1.2rem;
-        color: #ffffff;
       }
     }
   }

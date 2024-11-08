@@ -6,12 +6,13 @@
         class="img-ban"
         alt=""
       />
-      <van-notice-bar
+      <!-- <van-notice-bar
         class="home-notice"
         :left-icon="getAssetsImageUrl('/homeImg/notices.png')"
       >
-        详细了解如何在定投计划中利用DCA进行加密货币投资币资...
-      </van-notice-bar>
+        ETH:2400 BNB:2100 BTC:17000 ETH:2400 BNB:2100 BTC:17000 ETH:2400
+        BNB:2100 BTC:17000
+      </van-notice-bar> -->
     </div>
     <div class="home-functional">
       <div class="functionals">
@@ -25,6 +26,8 @@
           <div class="box-text">{{ t("Detailed.pool") }}</div>
           <div class="box-item">
             {{ formattedNumber(configStore.$state.homeList.poolTotal) }}
+
+            <!-- {{ startAnimation(configStore.$state.homeList.poolTotal)}} -->
           </div>
         </div>
         <div class="functional-box">
@@ -41,21 +44,21 @@
         </div>
         <div
           class="functional-area backminning"
-          @click="
-            goActivity('Liquidity Mining', configStore.$state.userInfo.is_true)
-          "
+          @click="goActivity('Liquidity Mining', configStore.$state.userInfo)"
         >
-          <div />
-          <div />
+          <div class="functional-text">{{ t("Detailed.mining") }}</div>
+          <div class="functional-img">
+            <img v-lazy="getAssetsImageUrl('/homeImg/gomning.png')" alt="" />
+          </div>
         </div>
         <div
           class="functional-area backheight"
-          @click="
-            goActivity('Advanced Mining', configStore.$state.userInfo.is_true)
-          "
+          @click="goActivity('Advanced Mining', configStore.$state.userInfo)"
         >
-          <div />
-          <div />
+          <div class="functional-text">{{ t("Detailed.advancedMining") }}</div>
+          <div class="functional-img">
+            <img v-lazy="getAssetsImageUrl('/homeImg/gomning.png')" alt="" />
+          </div>
         </div>
       </div>
       <van-button
@@ -69,12 +72,13 @@
         >{{ t("HeightPool.approvetext") }}</van-button
       >
     </div>
+    <div><quotes /></div>
     <div class="user-mining">
       <div class="mining-titles">{{ t("Detailed.userMining") }}</div>
       <div class="mining-box">
         <div class="box-titles">
-          <div>address</div>
-          <div>value</div>
+          <div>{{ t("addresstext") }}</div>
+          <div>{{ t("valnumber") }}</div>
         </div>
         <div class="box-line" />
         <div class="box-scroll">
@@ -124,7 +128,15 @@
     </div>
     <van-popup v-model:show="showaction" class="announcement" round>
       <div class="titles-announcement">
-        <span class="title-text"> {{ t("promoTitle") }}!!</span>
+        <span class="title-text">
+          <div class="announcement-img">
+            <img
+              v-lazy="getAssetsImageUrl('/homeImg/announcement.png')"
+              alt=""
+            />
+          </div>
+          <div class="announcement-text">{{ t("promoTitle") }}!!</div>
+        </span>
         <span class="title-off" @click="showaction = false">
           <img v-lazy="getAssetsImageUrl('/languageIcon/officon.png')" alt=""
         /></span>
@@ -143,10 +155,12 @@ import {
   formattedNumber,
   goToPage
 } from "@/utils/index.utils.js";
+import quotes from "@/components/quotes/index.vue";
 import { testApi } from "@/api/index";
 import {
   useWeb3ModalAccount,
-  useWeb3ModalProvider
+  useWeb3ModalProvider,
+  useWeb3Modal
 } from "@web3modal/ethers/vue";
 import { BrowserProvider, Contract } from "ethers";
 const { walletProvider } = useWeb3ModalProvider();
@@ -155,16 +169,21 @@ import BigNumber from "bignumber.js";
 import ABI from "@/assets/abi/erc20.abi.json";
 import { useI18n } from "vue3-i18n";
 import { useConfigStore } from "@/stores/index";
+const modal = useWeb3Modal();
 const configStore = useConfigStore();
 const { t } = useI18n();
 import { useRouter } from "vue-router";
 const router = useRouter();
 const goActivity = (pageName, state) => {
-  // if (state == false) {
-  //   showFailToast(t("joinevent"));
-  // } else {
-    router.push({ name: pageName });
-  // }
+  if (address.value == void 0) {
+    modal.open();
+  } else {
+    if (state.is_true == void 0 || state.is_true == false) {
+      showFailToast(t("joinevent"));
+    } else {
+      router.push({ name: pageName });
+    }
+  }
 };
 function generateRandomString(length) {
   const characters =
@@ -261,6 +280,7 @@ const handleConfirm = async function (approveAdress) {
   }
 };
 const showaction = ref(false);
+
 onMounted(() => {
   configStore.queryAgentMarketIncome();
   showaction.value = true;
@@ -320,6 +340,21 @@ onMounted(() => {
         border-radius: 0.71rem;
         height: 6.71rem;
         border: 0.04rem solid #ff693e33;
+        padding: 0.71rem;
+        .functional-text {
+          font-family: PingFang SC;
+          font-size: 1rem;
+          font-weight: 400;
+          line-height: 1.4rem;
+          color: #ffffff;
+        }
+        .functional-img {
+          width: 1.57rem;
+          margin-top: 1.86rem;
+          > img {
+            width: 100%;
+          }
+        }
       }
       .backminning {
         background: url("@/assets/images/homeImg/mining.png") no-repeat
@@ -434,17 +469,20 @@ onMounted(() => {
         .tit-icon {
           width: 2.14rem;
           height: 2.5rem;
-          margin-right: 0.5rem;
+
           > img {
             width: 100%;
             height: 100%;
+            // object-fit: cover;
           }
         }
         .tit-text {
+          padding-left: 0.5rem;
           color: #ffffff;
           font-family: PingFang SC;
           font-size: 1rem;
           font-weight: 400;
+          width: 90%;
         }
       }
       .faq-contant {
@@ -476,6 +514,15 @@ onMounted(() => {
         font-weight: 400;
         line-height: 1.4rem;
         color: #ff693e;
+        display: flex;
+        align-items: flex-end;
+        .announcement-img {
+          width: 1.71rem;
+          margin-right: 0.57rem;
+          > img {
+            width: 100%;
+          }
+        }
       }
       .title-off {
         width: 16px;

@@ -32,7 +32,7 @@
             </div>
             <div class="list-amount">{{ items.amount }}USDT</div>
           </div>
-          <div v-if="item.length == 0">暂无数据</div>
+          <div v-if="item.length == 0" class="nodata">{{t('nodata')}}</div>
         </van-tab>
       </van-tabs>
     </div>
@@ -172,6 +172,12 @@ onMounted(() => {
         color: #ffffff;
       }
     }
+  }
+  .nodata {
+    font-size: 1.14rem;
+    color: #ffffff;
+    font-weight: 600;
+    text-align: center;
   }
 }
 </style>

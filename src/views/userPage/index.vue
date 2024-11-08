@@ -19,11 +19,11 @@
       </div>
     </div>
     <div class="user-fn">
-      <div class="fn-item">
+      <div class="fn-item" @click="goToPage('Revenue Details')">
         <div class="item-icon">
           <img v-lazy="getAssetsImageUrl('/user/incomeicon.png')" alt="" />
         </div>
-        <div class="item-name">收益明细</div>
+        <div class="item-name">{{ t("revenuedetails") }}</div>
       </div>
       <div class="fn-item" @click="goToPage('Withdrawal Details')">
         <div class="item-icon">
@@ -31,11 +31,11 @@
         </div>
         <div class="item-name">{{ t("User.withdrawals") }}</div>
       </div>
-      <div class="fn-item">
+      <div class="fn-item" @click="goToPage('My Mining Pool')">
         <div class="item-icon">
           <img v-lazy="getAssetsImageUrl('/user/miningicon.png')" alt="" />
         </div>
-        <div class="item-name">我的挖矿</div>
+        <div class="item-name">{{ t("mymining") }}</div>
       </div>
       <div class="fn-item" @click="goToPage('Task Center')">
         <div class="item-icon">
@@ -48,7 +48,9 @@
       <div class="my-blance">
         <div class="blance-text">{{ t("User.assets") }}</div>
         <div class="blance-amount">
-          {{ Number(configStore.$state.usdtbalance).toFixed(4) || 0 }}
+          {{
+            Number(configStore.$state.userInfo.user_property).toFixed(4) || 0
+          }}
         </div>
       </div>
       <div class="blance-other">
@@ -108,7 +110,7 @@
 
 <script setup>
 import { BrowserProvider, Contract } from "ethers";
-import { onMounted, ref } from "vue";
+import { onMounted, ref, watch } from "vue";
 import {
   useWeb3ModalAccount,
   useWeb3ModalProvider
@@ -137,6 +139,15 @@ const goWithdraw = () => {
     return showFailToast(t("insufficientBalanceWithdrawal"));
   queryAuthAgent();
 };
+watch(address, (newValue, oldValue) => {
+  if (address.value == void 0) {
+    goToPage("homePage");
+  }
+  if (newValue !== oldValue && newValue) {
+    configStore.queryUserInfo(address.value, chainId.value);
+  }
+});
+// /api/v5/explorer/tokenprice/chain-list
 /**
  * 获取不同的授权地址。
  *
@@ -254,6 +265,7 @@ const queryWithdraw = () => {
       loadingBtv.value = false;
     });
 };
+
 onMounted(() => {});
 </script>
 <style lang="scss" scoped>
@@ -294,8 +306,10 @@ onMounted(() => {});
     margin-top: 1.57rem;
     background: #ffffff1a;
     border: 0.04rem solid #ffffff1a;
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    // display: flex;
+    // justify-content: space-between;
     padding: 1.43rem 1rem;
     border-radius: 0.71rem;
     .fn-item {
@@ -315,6 +329,7 @@ onMounted(() => {});
         font-weight: 400;
         line-height: 1.2rem;
         color: #ffffff;
+        text-align: center;
       }
     }
   }

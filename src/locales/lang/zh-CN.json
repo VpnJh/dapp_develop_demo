@@ -21,6 +21,22 @@
   "p_c01": "无需转账，USDT存放在您自己的钱包中0风险",
   "p_c02": "专业团队，全年稳定运营",
   "p_c03": "分享节点挖矿收益",
+  "nodata": "暂无数据",
+  "disabled": "未启用",
+  "enabled": "启用",
+  "settled": "已结算",
+  "copysuccess": "复制成功",
+  "myminingpool": {
+    "label": "我的矿池",
+    "status": "正常",
+    "settled": "已结算",
+    "liquidityPool": "流动矿池",
+    "stakingPool": "质押矿池",
+    "days": "天数",
+    "amount": "参与金额",
+    "dailyEarnings": "今日收益",
+    "totalEarnings": "总收益"
+  },
   "HeightPool": {
     "chainType": "链类型",
     "connect": "connect",

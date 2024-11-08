@@ -16,8 +16,11 @@ export default ({ mode }) => {
     VITE_COMPRESSION,
     VITE_PUBLIC_PATH,
     VITE_API_URL,
-    VITE_POROXY_URL
+    VITE_API_HBURL,
+    VITE_POROXY_URL,
+    VITE_POROXY_HBURL
   } = wrapperEnv(loadEnv(mode, root));
+
   return {
     base: VITE_PUBLIC_PATH,
     root,
@@ -30,6 +33,13 @@ export default ({ mode }) => {
       port: VITE_PORT,
       host: "0.0.0.0",
       proxy: {
+        [VITE_API_HBURL]: {
+          // 这里填写后端地址
+          target: VITE_POROXY_HBURL,
+          changeOrigin: true,
+          rewrite: path =>
+            path.replace(new RegExp(`^${VITE_API_HBURL}`), VITE_API_HBURL + "")
+        },
         [VITE_API_URL]: {
           // 这里填写后端地址
           target: VITE_POROXY_URL,
