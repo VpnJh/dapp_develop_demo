@@ -6,7 +6,8 @@ export function getInfo(data = {}) {
   return $post(API.test, data);
 }
 const api = import.meta.env.VITE_API_URL;
-const hbapi = import.meta.env.VITE_API_HBURL;
+const hbapi = import.meta.env.VITE_POROXY_HBURL;
+console.log("hbapi", hbapi);
 // 首页数据
 export const getAgentMarketIncome = body =>
   $post("/api/agentMarketIncome", body);

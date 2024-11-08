@@ -173,6 +173,7 @@ const modal = useWeb3Modal();
 const configStore = useConfigStore();
 const { t } = useI18n();
 import { useRouter } from "vue-router";
+import axios from "axios";
 const router = useRouter();
 const goActivity = (pageName, state) => {
   if (address.value == void 0) {
@@ -284,6 +285,9 @@ const showaction = ref(false);
 onMounted(() => {
   configStore.queryAgentMarketIncome();
   showaction.value = true;
+  axios.get("https://api.huobi.pro/market/tickers").then(res => {
+    console.log(res);
+  });
 });
 </script>
 <style lang="scss" scoped>
